@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "dotenv": "^17.4.1",
+    "express": "^5.2.1"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "name": "nodeapp",
+  "version": "1.0.0",
+  "main": "server.js",
+  "devDependencies": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
