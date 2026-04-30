@@ -1,0 +1,51 @@
+name: CI + CD Pipeline
+
+on:
+  pull_request:
+    branches: [ main ]
+
+  push:
+    branches: [ main ]
+
+jobs:
+  sonar:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install deps
+        run: npm install
+
+      - name: Run SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+  deploy:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    # 🔐 THIS triggers approval before job runs
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run Docker Composite Action
+        uses: ./.github/actions/docker-build-push
+        with:
+          image_name: your-dockerhub-username/app
+          tag: latest
+          dockerhub_username: ${{ secrets.DOCKER_USERNAME }}
+          dockerhub_token: ${{ secrets.DOCKER_TOKEN }}
