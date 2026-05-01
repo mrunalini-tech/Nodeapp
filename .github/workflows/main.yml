@@ -45,7 +45,7 @@ jobs:
       - name: Run Docker Composite Action
         uses: ./.github/actions/docker-build-push
         with:
-          image_name: your-dockerhub-username/app
+          image_name: your-dockerhub-munu3001dilipsurve/app
           tag: latest
           dockerhub_username: ${{ secrets.DOCKER_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKER_TOKEN }}
