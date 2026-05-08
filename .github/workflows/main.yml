@@ -1,51 +1,43 @@
-name: CI + CD Pipeline
+name: CI pipeline
 
-on:
-  pull_request:
-    branches: [ main ]
-
+on: 
+  workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: main
+  pull_request:
+    branches: main
 
 jobs:
   sonar:
+    runs-on: [self-hosted, wsl-pvk]
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - name: SonarQube analysis
+        uses: SonarSource/sonarqube-scan-action@v4
         with:
-          node-version: 18
-
-      - name: Install deps
-        run: npm install
-
-      - name: Run SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@v2
+          args: >
+            -Dsonar.projectKey=NodeJS_App
+            -Dsonar.sources=.
+            -Dsonar.qualitygate.wait=true
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-  deploy:
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-
-    # 🔐 THIS triggers approval before job runs
-    environment:
-      name: production
-
+  docker:
+    runs-on: [self-hosted, wsl-pvk]
+    if: github.event_name == 'push'  || github.event_name == 'workflow_dispatch'
+    environment: prod
+    
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Run Docker Composite Action
-        uses: ./.github/actions/docker-build-push
+      - name: Docker login, build, tag and push
+        uses: munu3001/git-demo/.github/actions/docker-build-push@main
         with:
-          image_name: your-dockerhub-munu3001dilipsurve/app
-          tag: latest
-          dockerhub_username: ${{ secrets.DOCKER_USERNAME }}
-          dockerhub_token: ${{ secrets.DOCKER_TOKEN }}
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
