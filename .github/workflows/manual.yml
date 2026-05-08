@@ -9,7 +9,7 @@ on:
 
 jobs:
   sonar:
-    runs-on: [self-hosted, wsl-pvk]
+    runs-on: [self-hosted, Linux,, X64]
     if: github.event_name == 'pull_request'
 
     steps:
